@@ -6,6 +6,8 @@ static const unsigned int snap      = 32;       /* snap pixel */
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
 static const int focusedontop       = 1;        /* 1 means focused client is shown on top of floating windows */
+static int floatposgrid_x           = 5;        /* float grid columns */
+static int floatposgrid_y           = 5;        /* float grid rows */
 static const char *fonts[]          = { "monospace:size=10" };
 static const char dmenufont[]       = "monospace:size=10";
 static const char col_gray1[]       = "#222222";
@@ -54,6 +56,7 @@ static const Layout layouts[] = {
 /* key definitions */
 #define M Mod4Mask
 #define A Mod1Mask
+#define R Mod3Mask
 #define S ShiftMask
 #define C ControlMask
 #define TAGKEYS(KEY,TAG) \
@@ -95,6 +98,44 @@ static Key keys[] = {
 	{ M,          XK_period, focusmon,       {.i = +1 } },
 	{ M|S,        XK_comma,  tagmon,         {.i = -1 } },
 	{ M|S,        XK_period, tagmon,         {.i = +1 } },
+	/* Client position is limited to monitor window area */
+	{ R,          XK_u,      floatpos,       {.v = "-26x -26y" } }, // ↖
+	{ R,          XK_i,      floatpos,       {.v = "  0x -26y" } }, // ↑
+	{ R,          XK_o,      floatpos,       {.v = " 26x -26y" } }, // ↗
+	{ R,          XK_j,      floatpos,       {.v = "-26x   0y" } }, // ←
+	{ R,          XK_l,      floatpos,       {.v = " 26x   0y" } }, // →
+	{ R,          XK_m,      floatpos,       {.v = "-26x  26y" } }, // ↙
+	{ R,          XK_comma,  floatpos,       {.v = "  0x  26y" } }, // ↓
+	{ R,          XK_period, floatpos,       {.v = " 26x  26y" } }, // ↘
+	/* Absolute positioning (allows moving windows between monitors) */
+	{ R|C,        XK_u,      floatpos,       {.v = "-26a -26a" } }, // ↖
+	{ R|C,        XK_i,      floatpos,       {.v = "  0a -26a" } }, // ↑
+	{ R|C,        XK_o,      floatpos,       {.v = " 26a -26a" } }, // ↗
+	{ R|C,        XK_j,      floatpos,       {.v = "-26a   0a" } }, // ←
+	{ R|C,        XK_l,      floatpos,       {.v = " 26a   0a" } }, // →
+	{ R|C,        XK_m,      floatpos,       {.v = "-26a  26a" } }, // ↙
+	{ R|C,        XK_comma,  floatpos,       {.v = "  0a  26a" } }, // ↓
+	{ R|C,        XK_period, floatpos,       {.v = " 26a  26a" } }, // ↘
+	/* Resize client, client center position is fixed which means that client expands in all directions */
+	{ R|S,        XK_u,      floatpos,       {.v = "-26w -26h" } }, // ↖
+	{ R|S,        XK_i,      floatpos,       {.v = "  0w -26h" } }, // ↑
+	{ R|S,        XK_o,      floatpos,       {.v = " 26w -26h" } }, // ↗
+	{ R|S,        XK_j,      floatpos,       {.v = "-26w   0h" } }, // ←
+	{ R|S,        XK_k,      floatpos,       {.v = "800W 800H" } }, // ·
+	{ R|S,        XK_l,      floatpos,       {.v = " 26w   0h" } }, // →
+	{ R|S,        XK_m,      floatpos,       {.v = "-26w  26h" } }, // ↙
+	{ R|S,        XK_comma,  floatpos,       {.v = "  0w  26h" } }, // ↓
+	{ R|S,        XK_period, floatpos,       {.v = " 26w  26h" } }, // ↘
+	/* Client is positioned in a floating grid, movement is relative to client's current position */
+	{ R|A,        XK_u,      floatpos,       {.v = "-1p -1p" } }, // ↖
+	{ R|A,        XK_i,      floatpos,       {.v = " 0p -1p" } }, // ↑
+	{ R|A,        XK_o,      floatpos,       {.v = " 1p -1p" } }, // ↗
+	{ R|A,        XK_j,      floatpos,       {.v = "-1p  0p" } }, // ←
+	{ R|A,        XK_k,      floatpos,       {.v = " 0p  0p" } }, // ·
+	{ R|A,        XK_l,      floatpos,       {.v = " 1p  0p" } }, // →
+	{ R|A,        XK_m,      floatpos,       {.v = "-1p  1p" } }, // ↙
+	{ R|A,        XK_comma,  floatpos,       {.v = " 0p  1p" } }, // ↓
+	{ R|A,        XK_period, floatpos,       {.v = " 1p  1p" } }, // ↘
 	TAGKEYS(      XK_1,                      0)
 	TAGKEYS(      XK_2,                      1)
 	TAGKEYS(      XK_3,                      2)
