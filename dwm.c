@@ -141,6 +141,9 @@ typedef struct {
 	int monitor;
 } Rule;
 
+/* RULE macro */
+#define RULE(...) { .monitor = -1, __VA_ARGS__ },
+
 /* function declarations */
 static void applyrules(Client *c);
 static int applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact);
