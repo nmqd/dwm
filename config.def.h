@@ -5,6 +5,7 @@ static const unsigned int borderpx  = 3;        /* border pixel of windows */
 static const unsigned int snap      = 32;       /* snap pixel */
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
+static const int attachmode         = 2;        /* 0 master (default), 1 = above, 2 = aside, 3 = below, 4 = bottom */
 static const int focusedontop       = 1;        /* 1 means focused client is shown on top of floating windows */
 static int floatposgrid_x           = 5;        /* float grid columns */
 static int floatposgrid_y           = 5;        /* float grid rows */
