@@ -12,7 +12,7 @@ static       int smartgaps          = 1;        /* 1 means no outer gap when the
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
 static const int attachmode         = 2;        /* 0 master (default), 1 = above, 2 = aside, 3 = below, 4 = bottom */
-static const int focusedontop       = 1;        /* 1 means focused client is shown on top of floating windows */
+static const int focusedontop       = 0;        /* 1 means focused client is shown on top of floating windows */
 static int floatposgrid_x           = 5;        /* float grid columns */
 static int floatposgrid_y           = 5;        /* float grid rows */
 static const char *fonts[]          = { "monospace:size=10" };
@@ -23,10 +23,14 @@ static char normfgcolor[]           = "#bbbbbb";
 static char selfgcolor[]            = "#eeeeee";
 static char selbordercolor[]        = "#005577";
 static char selbgcolor[]            = "#005577";
+static char normscratchcolor[]      = "#FF8800";
+static char selscratchcolor[]       = "#FF0000";
 static char *colors[][3] = {
   /*               fg           bg           border   */
   [SchemeNorm] = { normfgcolor, normbgcolor, normbordercolor },
-  [SchemeSel]  = { selfgcolor,  selbgcolor,  selbordercolor  },
+  [SchemeSel]  = { selfgcolor, selbgcolor, selbordercolor  },
+	[SchemeScratchNorm] = { normfgcolor, normbgcolor, normscratchcolor },
+	[SchemeScratchSel]  = { selfgcolor, selbgcolor, selscratchcolor  },
 };
 
 /* tagging */
@@ -45,6 +49,7 @@ static const Rule rules[] = {
 	RULE(.wintype = WTYPE "SPLASH", .isfloating = 1)
 	RULE(.role = "pop-up", .isfloating = 1)
   RULE(.class = "Firefox", .tags = 1 << 8)
+  RULE(.title = "scratchpad", .isfloating = 1, .floatpos = "50% 50% 60% 60%", .scratchkey = 's')
 };
 
 /* layout(s) */
@@ -101,10 +106,16 @@ static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() 
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbordercolor, "-sf", selfgcolor, NULL };
 static const char *termcmd[]  = { "st", NULL };
 
+/*First arg only serves to match against key in rules*/
+static const char *scratchpadcmd[] = {"s", "st", "-t", "scratchpad", NULL};
+
 static Key keys[] = {
 	/* modifier   key        function        argument */
 	{ M,          XK_p,      spawn,          {.v = dmenucmd } },
 	{ M|S,        XK_Return, spawn,          {.v = termcmd } },
+	{ M,          XK_s,      togglescratch,  {.v = scratchpadcmd } },
+	{ M|S,        XK_s,      removescratch,  {.v = scratchpadcmd } },
+	{ M|C,        XK_s,      setscratch,     {.v = scratchpadcmd } },
 	{ M,          XK_b,      togglebar,      {0} },
 	{ M,          XK_j,      focusstack,     {.i = +1 } },
 	{ M,          XK_k,      focusstack,     {.i = -1 } },
