@@ -318,6 +318,7 @@ static void updatestatus(void);
 static void updatetitle(Client *c);
 static void updatewmhints(Client *c);
 static void view(const Arg *arg);
+static void warp(const Client *c);
 static Client *wintoclient(Window w);
 static Monitor *wintomon(Window w);
 static int xerror(Display *dpy, XErrorEvent *ee);
@@ -334,6 +335,8 @@ static int screen;
 static int sw, sh;           /* X display screen geometry width, height */
 static int bh, blw = 0;      /* bar geometry */
 static int lrpad;            /* sum of left and right padding for text */
+static int force_warp = 0; // force warp in some situations, e.g. killclient
+static int ignore_warp = 0; // force skip warp in some situations, e.g. dragmfact, dragcfact
 static int (*xerrorxlib)(Display *, XErrorEvent *);
 static unsigned int numlockmask = 0;
 static void (*handler[LASTEvent]) (XEvent *) = {
@@ -1472,6 +1475,7 @@ focusmon(const Arg *arg)
 	unfocus(selmon->sel, 0);
 	selmon = m;
 	focus(NULL);
+	warp(selmon->sel);
 }
 
 void
@@ -2043,6 +2047,7 @@ killclient(const Arg *arg)
 		XSync(dpy, False);
 		XSetErrorHandler(xerror);
 		XUngrabServer(dpy);
+		force_warp = 1;
 	}
 }
 
@@ -2491,6 +2496,8 @@ restack(Monitor *m)
 	}
 	XSync(dpy, False);
 	while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
+	if (m == selmon && (m->tagset[m->seltags] & m->sel->tags) && m->lt[m->sellt]->arrange != &monocle)
+		warp(m->sel);
 }
 
 void
@@ -3409,6 +3416,31 @@ view(const Arg *arg)
 	focus(NULL);
 	arrange(selmon);
 	updatecurrentdesktop();
+}
+
+void
+warp(const Client *c)
+{
+	int x, y;
+
+  if (ignore_warp)
+		return;
+
+	if (!c) {
+		XWarpPointer(dpy, None, root, 0, 0, 0, 0, selmon->wx + selmon->ww / 2, selmon->wy + selmon->wh / 2);
+		return;
+	}
+
+	if (!getrootptr(&x, &y) ||
+		(x > c->x - c->bw &&
+		 y > c->y - c->bw &&
+		 x < c->x + c->w + c->bw*2 &&
+		 y < c->y + c->h + c->bw*2) ||
+		(y > c->mon->by && y < c->mon->by + bh) ||
+		(c->mon->topbar && !y))
+		return;
+
+	XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w / 2, c->h / 2);
 }
 
 Client *
