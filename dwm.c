@@ -88,7 +88,7 @@
 
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurResizeHorzArrow, CurResizeVertArrow, CurLast }; /* cursor */
-enum { SchemeNorm, SchemeSel, SchemeScratchNorm, SchemeScratchSel }; /* color schemes */
+enum { SchemeNorm, SchemeSel, SchemeFloatNorm, SchemeFloatSel, SchemeScratchNorm, SchemeScratchSel }; /* color schemes */
 enum { NetSupported, NetWMName, NetWMState, NetWMStateAbove, NetWMCheck,
        NetWMFullscreen, NetActiveWindow, NetWMWindowType,
        NetClientList, NetClientListStacking, NetDesktopNames,
@@ -1638,6 +1638,8 @@ focus(Client *c)
 		grabbuttons(c, 1);
 		if (c->scratchkey != 0)
 			XSetWindowBorder(dpy, c->win, scheme[SchemeScratchSel][ColBorder].pixel);
+    else if (c->isfloating)
+			XSetWindowBorder(dpy, c->win, scheme[SchemeFloatSel][ColBorder].pixel);
 		else
 			XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColBorder].pixel);
 		setfocus(c);
@@ -2296,6 +2298,8 @@ loadxrdb()
         XRDB_LOAD_COLOR("color8", selbordercolor);
         XRDB_LOAD_COLOR("color4", selbgcolor);
         XRDB_LOAD_COLOR("color0", selfgcolor);
+        XRDB_LOAD_COLOR("color2", normfloatcolor);
+        XRDB_LOAD_COLOR("color5", selfloatcolor);
         XRDB_LOAD_COLOR("color3", normscratchcolor);
         XRDB_LOAD_COLOR("color1", selscratchcolor);
       }
@@ -3414,11 +3418,12 @@ togglefloating(const Arg *arg)
 	if (selmon->sel->isfullscreen) /* no support for fullscreen windows */
 		return;
 	selmon->sel->isfloating = !selmon->sel->isfloating || selmon->sel->isfixed;
-	if (selmon->sel->isfloating)
+	if (selmon->sel->isfloating) {
+		XSetWindowBorder(dpy, selmon->sel->win, scheme[SchemeFloatNorm][ColBorder].pixel);
 		/* restore last known float dimensions */
 		resize(selmon->sel, selmon->sel->sfx, selmon->sel->sfy,
 		       selmon->sel->sfw, selmon->sel->sfh, False);
-	else {
+	} else {
 		/* save last known float dimensions */
 		selmon->sel->sfx = selmon->sel->x;
 		selmon->sel->sfy = selmon->sel->y;
@@ -3615,6 +3620,8 @@ unfocus(Client *c, int setfocus)
 	grabbuttons(c, 0);
 	if (c->scratchkey != 0)
 		XSetWindowBorder(dpy, c->win, scheme[SchemeScratchNorm][ColBorder].pixel);
+  else if (c->isfloating)
+		XSetWindowBorder(dpy, c->win, scheme[SchemeFloatNorm][ColBorder].pixel);
 	else
 		XSetWindowBorder(dpy, c->win, scheme[SchemeNorm][ColBorder].pixel);
 	if (setfocus) {
