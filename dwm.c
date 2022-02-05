@@ -291,6 +291,7 @@ static void sendmon(Client *c, Monitor *m);
 static void setclientstate(Client *c, long state);
 static void setcurrentdesktop(void);
 static void setdesktopnames(void);
+static void setfloatinghint(Client *c);
 static void setfloatpos(Client *c, const char *floatpos);
 static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen);
@@ -2384,6 +2385,7 @@ manage(Window w, XWindowAttributes *wa)
 	XMapWindow(dpy, c->win);
 
 	focus(NULL);
+	setfloatinghint(c);
 	while (XCheckMaskEvent(dpy, EnterWindowMask, &xev));
 }
 
@@ -3011,6 +3013,14 @@ setnumdesktops(void){
 }
 
 void
+setfloatinghint(Client *c)
+{
+	Atom target = XInternAtom(dpy, "_IS_FLOATING", 0);
+	unsigned int floating[1] = {c->isfloating};
+	XChangeProperty(dpy, c->win, target, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)floating, 1);
+}
+
+void
 setfloatpos(Client *c, const char *floatpos)
 {
 	char xCh, yCh, wCh, hCh;
@@ -3413,6 +3423,7 @@ togglebar(const Arg *arg)
 void
 togglefloating(const Arg *arg)
 {
+	Client *c = selmon->sel;
 	if (!selmon->sel)
 		return;
 	if (selmon->sel->isfullscreen) /* no support for fullscreen windows */
@@ -3431,6 +3442,7 @@ togglefloating(const Arg *arg)
 		selmon->sel->sfh = selmon->sel->h;
 	}
 	arrange(selmon);
+	setfloatinghint(c);
 }
 
 void
