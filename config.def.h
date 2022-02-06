@@ -213,6 +213,8 @@ static Key keys[] = {
 	{ M,          XK_period, focusmon,       {.i = +1 } },
 	{ M|S,        XK_comma,  tagmon,         {.i = -1 } },
 	{ M|S,        XK_period, tagmon,         {.i = +1 } },
+	{ M|C,        XK_comma,  cyclelayout,    {.i = -1 } },
+	{ M|C,        XK_period, cyclelayout,    {.i = +1 } },
 	/* Client position is limited to monitor window area */
 	{ R,          XK_u,      floatpos,       {.v = "-26x -26y" } }, // ↖
 	{ R,          XK_i,      floatpos,       {.v = "  0x -26y" } }, // ↑
