@@ -59,7 +59,7 @@
 #define MOUSEMASK               (BUTTONMASK|PointerMotionMask)
 #define WIDTH(X)                ((X)->w + 2 * (X)->bw)
 #define HEIGHT(X)               ((X)->h + 2 * (X)->bw)
-#define TAGMASK                 ((1 << LENGTH(tags)) - 1)
+#define TAGMASK                 ((1 << NUMTAGS) - 1)
 #define TAGSLENGTH              (LENGTH(tags))
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
 
@@ -96,6 +96,18 @@ enum { NetSupported, NetWMName, NetWMState, NetWMStateAbove, NetWMCheck,
 enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMWindowRole, WMLast }; /* default atoms */
 enum { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
        ClkClientWin, ClkRootWin, ClkLast }; /* clicks */
+enum {
+	IconsDefault,
+	IconsBullets,
+	IconsNumbers,
+	IconsLetters,
+	IconsText,
+	IconsSubscript,
+	IconsVacant,
+	IconsOccupied,
+	IconsSelected,
+	IconsLast
+}; /* icon sets */
 
 typedef union {
 	int i;
@@ -165,6 +177,7 @@ struct Monitor {
 	unsigned int tagset[2];
 	int showbar;
 	int topbar;
+	int iconset;
 	Client *clients;
 	Client *sel;
 	Client *stack;
@@ -222,6 +235,7 @@ static void configure(Client *c);
 static void configurenotify(XEvent *e);
 static void configurerequest(XEvent *e);
 static Monitor *createmon(void);
+static void cycleiconset(const Arg *arg);
 static void cyclelayout(const Arg *arg);
 static void deck(Monitor *m);
 static void defaultgaps(const Arg *arg);
@@ -249,6 +263,7 @@ static Atom getatomprop(Client *c, Atom prop);
 static void getfacts(Monitor *m, int msize, int ssize, float *mf, float *sf, int *mr, int *sr);
 static void getfloatpos(int pos, char pCh, int size, char sCh, int min_p, int max_s, int cp, int cs, int cbw, int defgrid, int *out_p, int *out_s);
 static void getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc);
+static char * geticon(Monitor *m, int tag, int iconset);
 static int getrootptr(int *x, int *y);
 static long getstate(Window w);
 static pid_t getstatusbarpid();
@@ -299,6 +314,7 @@ static void setfloatpos(Client *c, const char *floatpos);
 static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen);
 static void setgaps(int oh, int ov, int ih, int iv);
+static void seticonset(const Arg *arg);
 static void setlayout(const Arg *arg);
 static void setcfact(const Arg *arg);
 static void setmfact(const Arg *arg);
@@ -316,6 +332,7 @@ static void spawn(const Arg *arg);
 static void spawnscratch(const Arg *arg);
 static void spiral(Monitor *m);
 static void tag(const Arg *arg);
+static char * tagicon(Monitor *m, int tag);
 static void tagmon(const Arg *arg);
 static void tile(Monitor *m);
 static void togglebar(const Arg *arg);
@@ -406,7 +423,7 @@ struct Pertag {
 };
 
 /* compile-time check if all tags fit into an unsigned int bit array. */
-struct NumTags { char limitexceeded[LENGTH(tags) > 31 ? -1 : 1]; };
+struct NumTags { char limitexceeded[NUMTAGS > 31 ? -1 : 1]; };
 
 /* function implementations */
 void
@@ -696,7 +713,7 @@ bstackhoriz(Monitor *m)
 void
 buttonpress(XEvent *e)
 {
-	unsigned int i, x, click;
+	unsigned int i, x, tw, click;
 	Arg arg = {0};
 	Client *c;
 	Monitor *m;
@@ -711,10 +728,13 @@ buttonpress(XEvent *e)
 	}
 	if (ev->window == selmon->barwin) {
 		i = x = 0;
-		do
-			x += TEXTW(tags[i]);
-		while (ev->x >= x && ++i < LENGTH(tags));
-		if (i < LENGTH(tags)) {
+		do {
+			tw = TEXTW(tagicon(selmon, i));
+			if (tw <= lrpad)
+				continue;
+			x += tw;
+		} while (ev->x >= x && ++i < NUMTAGS);
+		if (i < NUMTAGS) {
 			click = ClkTagBar;
 			arg.ui = 1 << i;
 		} else if (ev->x < x + blw)
@@ -1150,6 +1170,24 @@ createmon(void)
 }
 
 void
+cycleiconset(const Arg *arg)
+{
+	Monitor *m = selmon;
+	if (arg->i == 0)
+		return;
+	if (arg->i > 0) {
+		for (++m->iconset; m->iconset < IconsLast && tagicons[m->iconset][0] == NULL; ++m->iconset);
+		if (m->iconset >= IconsLast)
+			m->iconset = 0;
+	} else if (arg->i < 0) {
+		for (--m->iconset; m->iconset > 0 && tagicons[m->iconset][0] == NULL; --m->iconset);
+		if (m->iconset < 0)
+			for (m->iconset = IconsLast - 1; m->iconset > 0 && tagicons[m->iconset][0] == NULL; --m->iconset);
+	}
+	drawbar(m);
+}
+
+void
 cyclelayout(const Arg *arg) {
 	Layout *l;
 	for(l = (Layout *)layouts; l != selmon->lt[selmon->sellt]; l++);
@@ -1471,6 +1509,7 @@ drawbar(Monitor *m)
 	int boxs = drw->fonts->h / 9;
 	int boxw = drw->fonts->h / 6 + 2;
 	unsigned int i, occ = 0, urg = 0;
+	char *icon;
 	Client *c;
 
 	if (!m->showbar)
@@ -1490,10 +1529,13 @@ drawbar(Monitor *m)
 			urg |= c->tags;
 	}
 	x = barborder;
-	for (i = 0; i < LENGTH(tags); i++) {
-		w = TEXTW(tags[i]);
+	for (i = 0; i < NUMTAGS; i++) {
+		icon = tagicon(m, i);
+		w = TEXTW(icon);
+		if (w <= lrpad)
+			continue;
 		drw_setscheme(drw, scheme[m->tagset[m->seltags] & 1 << i ? SchemeSel : SchemeNorm]);
-		drw_text(drw, x, y, w, th, lrpad / 2, tags[i], urg & 1 << i);
+		drw_text(drw, x, y, w, th, lrpad / 2, icon, urg & 1 << i);
 		if (occ & 1 << i)
 			drw_rect(drw, x + boxs, y + boxs, boxw, boxw,
 				m == selmon && selmon->sel && selmon->sel->tags & 1 << i,
@@ -2149,6 +2191,20 @@ getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
 	*ih = m->gappih*ie; // inner horizontal gap
 	*iv = m->gappiv*ie; // inner vertical gap
 	*nc = n;            // number of clients
+}
+
+char *
+geticon(Monitor *m, int tag, int iconset)
+{
+	int i;
+	int tagindex = tag + NUMTAGS * m->num;
+	for (i = 0; i < LENGTH(tagicons[iconset]) && tagicons[iconset][i] != NULL; ++i);
+	if (i == 0)
+		tagindex = 0;
+	else if (tagindex >= i)
+		tagindex = tagindex % i;
+
+	return tagicons[iconset][tagindex];
 }
 
 int
@@ -3213,8 +3269,12 @@ setcurrentdesktop(void){
 	XChangeProperty(dpy, root, netatom[NetCurrentDesktop], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 }
 void setdesktopnames(void){
+  int i;
 	XTextProperty text;
-	Xutf8TextListToTextProperty(dpy, (char **) tags, TAGSLENGTH, XUTF8StringStyle, &text);
+  char *tags[NUMTAGS];
+  for (i = 0; i < NUMTAGS; i++)
+    tags[i] = tagicon(selmon, i);
+	Xutf8TextListToTextProperty(dpy, tags, TAGSLENGTH, XUTF8StringStyle, &text);
 	XSetTextProperty(dpy, root, &text, netatom[NetDesktopNames]);
 }
 
@@ -3359,6 +3419,15 @@ setgaps(int oh, int ov, int ih, int iv)
   selmon->pertag->gaps[selmon->pertag->curtag] =
 		((oh & 0xFF) << 0) | ((ov & 0xFF) << 8) | ((ih & 0xFF) << 16) | ((iv & 0xFF) << 24);
 	arrange(selmon);
+}
+
+void
+seticonset(const Arg *arg)
+{
+	if (arg->i >= 0 && arg->i < IconsLast) {
+		selmon->iconset = arg->i;
+		drawbar(selmon);
+	}
 }
 
 void
@@ -3660,6 +3729,26 @@ tag(const Arg *arg)
 		focus(NULL);
 		arrange(selmon);
 	}
+}
+
+char *
+tagicon(Monitor *m, int tag)
+{
+	Client *c;
+	char *icon;
+	for (c = m->clients; c && (!(c->tags & 1 << tag)); c = c->next);
+	// for (c = m->clients; c && (!(c->tags & 1 << tag) || HIDDEN(c)); c = c->next); // awesomebar / wintitleactions compatibility
+	if (m->tagset[m->seltags] & 1 << tag && tagicons[IconsSelected][0] != NULL)
+		icon = geticon(m, tag, IconsSelected);
+	else if (c && tagicons[IconsOccupied][0] != NULL)
+		icon = geticon(m, tag, IconsOccupied);
+	else {
+		icon = geticon(m, tag, m->iconset);
+		if (TEXTW(icon) <= lrpad && m->tagset[m->seltags] & 1 << tag)
+			icon = geticon(m, tag, IconsVacant);
+	}
+
+	return icon;
 }
 
 void

@@ -79,7 +79,18 @@ static char *termcolor[] = {
 };
 
 /* tagging */
-static const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+static const char *tags[NUMTAGS] = { NULL };  /* left for compatibility reasons, i.e. code that checks LENGTH(tags) */
+static char *tagicons[][NUMTAGS] = {
+	[IconsDefault]        = { " ", " ", " ", " ", "漣 ", " ", " ", " ", " " },
+	[IconsBullets]        = { "•" },
+	[IconsNumbers]        = { "1", "2", "3", "4", "5", "6", "7", "8", "9" },
+	[IconsLetters]        = { "A", "B", "C", "D", "E", "F", "G", "H", "I" },
+	[IconsText]           = { "terminal", "mail", "music", "files", "prog", "social", "media", "play", "web" },
+	[IconsSubscript]      = { " ₁", " ₂", " ₃", " ₄", " ₅", " ₆", " ₇", " ₈", " ₉" },
+	[IconsVacant]         = { NULL },
+	[IconsOccupied]       = { " ", " ", " ", " ", "漣 ", " ", "磊 ", " ", " " },
+	[IconsSelected]       = { NULL },
+};
 
 #define WTYPE "_NET_WM_WINDOW_TYPE_"
 static const Rule rules[] = {
@@ -215,6 +226,8 @@ static Key keys[] = {
 	{ M|S,        XK_period, tagmon,         {.i = +1 } },
 	{ M|C,        XK_comma,  cyclelayout,    {.i = -1 } },
 	{ M|C,        XK_period, cyclelayout,    {.i = +1 } },
+	// { M|S,        XK_a,      seticonset,     {.i = 0 } },
+	// { M|S,        XK_b,      seticonset,     {.i = 1 } },
 	/* Client position is limited to monitor window area */
 	{ R,          XK_u,      floatpos,       {.v = "-26x -26y" } }, // ↖
 	{ R,          XK_i,      floatpos,       {.v = "  0x -26y" } }, // ↑
@@ -298,4 +311,6 @@ static Button buttons[] = {
 	{ ClkTagBar,        0,           Button3,    toggleview,     {0} },
 	{ ClkTagBar,        M,           Button1,    tag,            {0} },
 	{ ClkTagBar,        M,           Button3,    toggletag,      {0} },
+	{ ClkTagBar,        0,           Button4,    cycleiconset,   {.i = +1 } },
+	{ ClkTagBar,        0,           Button5,    cycleiconset,   {.i = -1 } },
 };
