@@ -88,7 +88,8 @@
 
 /* enums */
 enum { CurNormal, CurResize, CurResizeBR, CurResizeBL, CurResizeTR, CurResizeTL, CurResizeHorzArrow, CurResizeVertArrow, CurMove, CurLast }; /* cursor */
-enum { SchemeNorm, SchemeSel, SchemeFloatNorm, SchemeFloatSel, SchemeScratchNorm, SchemeScratchSel }; /* color schemes */
+enum { SchemeNorm, SchemeSel, SchemeFloatNorm, SchemeFloatSel, SchemeScratchNorm, SchemeScratchSel, SchemeTags, SchemeLayout,
+       SchemeTag1, SchemeTag2, SchemeTag3, SchemeTag4, SchemeTag5, SchemeTag6, SchemeTag7, SchemeTag8, SchemeTag9}; /* color schemes */
 enum { NetSupported, NetWMName, NetWMState, NetWMStateAbove, NetWMCheck,
        NetWMFullscreen, NetActiveWindow, NetWMWindowType,
        NetClientList, NetClientListStacking, NetDesktopNames,
@@ -1534,18 +1535,19 @@ drawbar(Monitor *m)
 		w = TEXTW(icon);
 		if (w <= lrpad)
 			continue;
-		drw_setscheme(drw, scheme[m->tagset[m->seltags] & 1 << i ? SchemeSel : SchemeNorm]);
+		// drw_setscheme(drw, scheme[m->tagset[m->seltags] & 1 << i ? SchemeSel : SchemeNorm]);
+		drw_setscheme(drw, scheme[occ & 1 << i ? tagschemes[i] : SchemeTags]);
 		drw_text(drw, x, y, w, th, lrpad / 2, icon, urg & 1 << i);
 		if (ulineall || m->tagset[m->seltags] & 1 << i) /* if there are conflicts, just move these lines directly underneath both 'drw_setscheme' and 'drw_text' :) */
 			drw_rect(drw, x + ulinepad, th - ulinestroke - ulinevoffset, w - (ulinepad * 2), ulinestroke, 1, 0);
-		if (occ & 1 << i)
-			drw_rect(drw, x + boxs, y + boxs, boxw, boxw,
-				m == selmon && selmon->sel && selmon->sel->tags & 1 << i,
-				urg & 1 << i);
+		// if (occ & 1 << i)
+		// 	drw_rect(drw, x + boxs, y + boxs, boxw, boxw,
+		// 		m == selmon && selmon->sel && selmon->sel->tags & 1 << i,
+		// 		urg & 1 << i);
 		x += w;
 	}
 	w = blw = TEXTW(m->ltsymbol);
-	drw_setscheme(drw, scheme[SchemeNorm]);
+	drw_setscheme(drw, scheme[SchemeLayout]);
 	x = drw_text(drw, x, y, w, th, lrpad / 2, m->ltsymbol, 0);
 
 	if ((w = mw - tw - x) > th) {

@@ -16,7 +16,7 @@ static const int barheight          = 24;        /* 0 means that dwm will calcul
 static const int vertpad            = 10;       /* vertical padding of bar */
 static const int sidepad            = 10;       /* horizontal padding of bar */
 static const int horizpadbar        = 10;        /* horizontal padding for statusbar */
-static const int vertpadbar         = 5;        /* vertical padding for statusbar */
+static const int vertpadbar         = 10;        /* vertical padding for statusbar */
 static const int attachmode         = 2;        /* 0 master (default), 1 = above, 2 = aside, 3 = below, 4 = bottom */
 static const int focusedontop       = 0;        /* 1 means focused client is shown on top of floating windows */
 static int floatposgrid_x           = 5;        /* float grid columns */
@@ -41,6 +41,17 @@ static char *colors[][3] = {
   [SchemeFloatSel]  = { selfgcolor, selbgcolor, selfloatcolor  },
 	[SchemeScratchNorm] = { normfgcolor, normbgcolor, normscratchcolor },
 	[SchemeScratchSel]  = { selfgcolor, selbgcolor, selscratchcolor  },
+  [SchemeTags] = { normfgcolor, normbgcolor, normbordercolor },
+  [SchemeTag1] = { "#9ECE6A", normbgcolor, normbordercolor },
+  [SchemeTag2] = { "#E0AF68", normbgcolor, normbordercolor },
+  [SchemeTag3] = { "#7DCFFF", normbgcolor, normbordercolor },
+  [SchemeTag4] = { "#F7768E", normbgcolor, normbordercolor },
+  [SchemeTag5] = { "#BB9AF7", normbgcolor, normbordercolor },
+  [SchemeTag6] = { "#414868", normbgcolor, normbordercolor },
+  [SchemeTag7] = { "#9ECE6A", normbgcolor, normbordercolor },
+  [SchemeTag8] = { "#7AA2F7", normbgcolor, normbordercolor },
+  [SchemeTag9] = { "#E0AF68", normbgcolor, normbordercolor },
+  [SchemeLayout] = { normfgcolor, normbgcolor, normbordercolor },
 };
 
 static char termcol0[] = "#000000"; /* black   */
@@ -92,9 +103,15 @@ static char *tagicons[][NUMTAGS] = {
 	[IconsSelected]       = { NULL },
 };
 
+static const int tagschemes[] = {
+  SchemeTag1, SchemeTag2, SchemeTag3,
+  SchemeTag4, SchemeTag5, SchemeTag6,
+  SchemeTag7, SchemeTag8, SchemeTag9,
+};
+
 static const unsigned int ulinepad	= 5;	/* horizontal padding between the underline and tag */
 static const unsigned int ulinestroke	= 2;	/* thickness / height of the underline */
-static const unsigned int ulinevoffset	= 2;	/* how far above the bottom of the bar the line should appear */
+static const unsigned int ulinevoffset	= 0;	/* how far above the bottom of the bar the line should appear */
 static const int ulineall 		= 0;	/* 1 to show underline on all tags, 0 for just the active ones */
 
 #define WTYPE "_NET_WM_WINDOW_TYPE_"
