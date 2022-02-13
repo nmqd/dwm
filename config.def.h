@@ -89,6 +89,29 @@ static char *termcolor[] = {
   termcol15,
 };
 
+static const unsigned int baralpha = 0xd0;
+static const unsigned int borderalpha = OPAQUE;
+static const unsigned int alphas[][3]      = {
+	/*               fg      bg        border     */
+	[SchemeNorm] = { OPAQUE, baralpha, borderalpha },
+	[SchemeSel] = { OPAQUE, baralpha, borderalpha },
+  [SchemeFloatNorm] = { OPAQUE, baralpha, borderalpha },
+  [SchemeFloatSel] = { OPAQUE, baralpha, borderalpha },
+	[SchemeScratchNorm] = { OPAQUE, baralpha, borderalpha },
+	[SchemeScratchSel] = { OPAQUE, baralpha, borderalpha },
+  [SchemeTags] = { OPAQUE, baralpha, borderalpha },
+  [SchemeTag1] = { OPAQUE, baralpha, borderalpha },
+  [SchemeTag2] = { OPAQUE, baralpha, borderalpha },
+  [SchemeTag3] = { OPAQUE, baralpha, borderalpha },
+  [SchemeTag4] = { OPAQUE, baralpha, borderalpha },
+  [SchemeTag5] = { OPAQUE, baralpha, borderalpha },
+  [SchemeTag6] = { OPAQUE, baralpha, borderalpha },
+  [SchemeTag7] = { OPAQUE, baralpha, borderalpha },
+  [SchemeTag8] = { OPAQUE, baralpha, borderalpha },
+  [SchemeTag9] = { OPAQUE, baralpha, borderalpha },
+  [SchemeLayout] = { OPAQUE, baralpha, borderalpha },
+};
+
 /* tagging */
 static const char *tags[NUMTAGS] = { NULL };  /* left for compatibility reasons, i.e. code that checks LENGTH(tags) */
 static char *tagicons[][NUMTAGS] = {
