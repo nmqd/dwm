@@ -19,6 +19,7 @@ static const int horizpadbar        = 10;        /* horizontal padding for statu
 static const int vertpadbar         = 10;        /* vertical padding for statusbar */
 static const int attachmode         = 2;        /* 0 master (default), 1 = above, 2 = aside, 3 = below, 4 = bottom */
 static const int focusedontop       = 0;        /* 1 means focused client is shown on top of floating windows */
+static const int swallowfloating    = 0;        /* 1 means swallow floating windows by default */
 static int floatposgrid_x           = 5;        /* float grid columns */
 static int floatposgrid_y           = 5;        /* float grid rows */
 static const char *fonts[]          = { "monospace:size=10" };
@@ -150,7 +151,9 @@ static const Rule rules[] = {
 	RULE(.wintype = WTYPE "SPLASH", .isfloating = 1)
 	RULE(.role = "pop-up", .isfloating = 1)
   RULE(.class = "Firefox", .tags = 1 << 8)
+	RULE(.class = "st-256color", .isterminal = 1)
   RULE(.title = "scratchpad", .isfloating = 1, .floatpos = "50% 50% 60% 60%", .scratchkey = 's')
+	RULE(.title = "Event Tester", .noswallow = 1)
 };
 
 /* layout(s) */
