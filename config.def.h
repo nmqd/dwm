@@ -22,6 +22,12 @@ static const int focusedontop       = 0;        /* 1 means focused client is sho
 static const int swallowfloating    = 0;        /* 1 means swallow floating windows by default */
 static int floatposgrid_x           = 5;        /* float grid columns */
 static int floatposgrid_y           = 5;        /* float grid rows */
+static const char slopspawnstyle[]  = "-t 0 -c 0.92,0.85,0.69,0.3 -o"; /* do NOT define -f (format) here */
+static const char slopresizestyle[] = "-t 0 -c 0.92,0.85,0.69,0.3"; /* do NOT define -f (format) here */
+static const int riodraw_borders    = 0;        /* 0 or 1, indicates whether the area drawn using slop includes the window borders */
+static const int riodraw_matchpid   = 1;        /* 0 or 1, indicates whether to match the PID of the client that was spawned with riospawn */
+static const int riodraw_spawnasync = 0;        /* 0 means that the application is only spawned after a successful selection while
+                                                 * 1 means that the application is being initialised in the background while the selection is made */
 static const char *fonts[]          = { "monospace:size=10" };
 static const char dmenufont[]       = "monospace:size=10";
 static char normbgcolor[]           = "#222222";
@@ -219,6 +225,8 @@ static Key keys[] = {
 	/* modifier   key        function        argument */
 	{ M,          XK_p,      spawn,          {.v = dmenucmd } },
 	{ M|S,        XK_Return, spawn,          {.v = termcmd } },
+	{ M|C,        XK_Return, riospawn,       {.v = termcmd } },
+	{ M,          XK_r,      rioresize,      {0} },
 	{ M,          XK_s,      togglescratch,  {.v = scratchpadcmd } },
 	{ M|S,        XK_s,      removescratch,  {.v = scratchpadcmd } },
 	{ M|C,        XK_s,      setscratch,     {.v = scratchpadcmd } },
