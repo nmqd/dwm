@@ -1203,9 +1203,11 @@ createmon(void)
 
 		m->pertag->prevzooms[i] = NULL;
 
+    #if PERTAG_VANITYGAPS
     m->pertag->enablegaps[i] = 1;
 		m->pertag->gaps[i] =
 			((gappoh & 0xFF) << 0) | ((gappov & 0xFF) << 8) | ((gappih & 0xFF) << 16) | ((gappiv & 0xFF) << 24);
+    #endif // PERTAG_VANITYGAPS
 
 		for (j = 0; j < LENGTH(monrules); j++) {
 			mr = &monrules[j];
@@ -2227,11 +2229,11 @@ void
 getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
 {
 	unsigned int n, oe, ie;
-	#if PERTAG_PATCH
+	#if PERTAG_VANITYGAPS
 	oe = ie = selmon->pertag->enablegaps[selmon->pertag->curtag];
 	#else
 	oe = ie = enablegaps;
-	#endif // PERTAG_PATCH
+	#endif // PERTAG_VANITYGAPS
 	Client *c;
 
 	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
@@ -4090,11 +4092,11 @@ togglefloating(const Arg *arg)
 void
 togglegaps(const Arg *arg)
 {
-	#if PERTAG_PATCH
+	#if PERTAG_VANITYGAPS
 	selmon->pertag->enablegaps[selmon->pertag->curtag] = !selmon->pertag->enablegaps[selmon->pertag->curtag];
 	#else
 	enablegaps = !enablegaps;
-	#endif // PERTAG_PATCH
+	#endif // PERTAG_VANITYGAPS
 	arrange(NULL);
 }
 
