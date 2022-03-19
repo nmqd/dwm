@@ -207,6 +207,7 @@ static const MonitorRule monrules[] = {
 	{ M,     KEY,   view,           {.ui = 1 << TAG} }, \
 	{ M|C,   KEY,   toggleview,     {.ui = 1 << TAG} }, \
 	{ M|S,   KEY,   tag,            {.ui = 1 << TAG} }, \
+	{ M|A,   KEY,   tagview,        {.ui = 1 << TAG} }, \
 	{ M|C|S, KEY,   toggletag,      {.ui = 1 << TAG} },
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */

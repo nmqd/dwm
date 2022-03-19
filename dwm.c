@@ -354,6 +354,7 @@ static void spiral(Monitor *m);
 static void tag(const Arg *arg);
 static char * tagicon(Monitor *m, int tag);
 static void tagmon(const Arg *arg);
+static void tagview(const Arg *arg);
 static void tile(Monitor *m);
 static void togglebar(const Arg *arg);
 static void togglefloating(const Arg *arg);
@@ -4021,6 +4022,17 @@ tagmon(const Arg *arg)
 	if (!selmon->sel || !mons->next)
 		return;
 	sendmon(selmon->sel, dirtomon(arg->i));
+}
+
+void
+tagview(const Arg *arg)
+{
+  if (selmon->sel && arg->ui & TAGMASK) {
+    selmon->sel->tags = arg->ui & TAGMASK;
+    focus(NULL);
+    if (((arg->ui & TAGMASK) != TAGMASK))
+      view(arg);
+  }
 }
 
 static void
