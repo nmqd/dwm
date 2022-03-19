@@ -307,6 +307,7 @@ static void moveorplace(const Arg *arg);
 static Client *nexttiled(Client *c);
 static void nrowgrid(Monitor *m);
 static void placemouse(const Arg *arg);
+static void pop(Client *);
 static void propertynotify(XEvent *e);
 static void quit(const Arg *arg);
 static Client *recttoclient(int x, int y, int w, int h);
@@ -3087,6 +3088,15 @@ placemouse(const Arg *arg)
 }
 
 void
+pop(Client *c)
+{
+	detach(c);
+	attach(c);
+	focus(c);
+	arrange(c->mon);
+}
+
+void
 propertynotify(XEvent *e)
 {
 	Client *c;
@@ -4259,6 +4269,15 @@ toggleview(const Arg *arg)
 {
 	unsigned int newtagset = selmon->tagset[selmon->seltags] ^ (arg->ui & TAGMASK);
 	int i;
+
+	// the first visible client should be the same after we add a new tag
+	// we also want to be sure not to mutate the focus
+	Client *const c = nexttiled(selmon->clients);
+	if (c) {
+		Client * const selected = selmon->sel;
+		pop(c);
+		focus(selected);
+	}
 
 	if (newtagset) {
 		if (newtagset == ~0) {
