@@ -158,7 +158,7 @@ static const Rule rules[] = {
 	RULE(.role = "pop-up", .isfloating = 1)
   RULE(.class = "Firefox", .tags = 1 << 8)
 	RULE(.class = "st-256color", .isterminal = 1)
-  RULE(.title = "scratchpad", .isfloating = 1, .floatpos = "50% 50% 60% 60%", .scratchkey = 's')
+  RULE(.title = "scratchpad", .floatpos = "50% 50% 60% 60%", .scratchkey = 's')
 	RULE(.title = "Event Tester", .noswallow = 1)
 };
 

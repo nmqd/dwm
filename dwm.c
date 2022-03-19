@@ -145,7 +145,7 @@ struct Client {
 	int basew, baseh, incw, inch, maxw, maxh, minw, minh;
 	int bw, oldbw;
 	unsigned int tags;
-	int isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen, isterminal, noswallow;
+	int isfixed, isfloating, isfloatpos, isurgent, neverfocus, oldstate, isfullscreen, isterminal, noswallow;
 	int ignorecfgreqpos, ignorecfgreqsize;
 	char scratchkey;
 	int alwaysontop;
@@ -476,6 +476,7 @@ applyrules(Client *c)
 
 	/* rule matching */
 	c->isfloating = 0;
+	c->isfloatpos = 0;
 	c->tags = 0;
 	c->noswallow = 0;
 	c->scratchkey = 0;
@@ -502,8 +503,11 @@ applyrules(Client *c)
 			for (m = mons; m && m->num != r->monitor; m = m->next);
 			if (m)
 				c->mon = m;
-			if (c->isfloating && r->floatpos)
+			if (r->floatpos) {
+        c->isfloating = 1;
 				setfloatpos(c, r->floatpos);
+        c->isfloatpos = 1;
+      }
 		}
 	}
 	if (ch.res_class)
@@ -2702,6 +2706,9 @@ manage(Window w, XWindowAttributes *wa)
 	updatesizehints(c);
 	updatewmhints(c);
 	updatemotifhints(c);
+	if (((c->isfloating && !c->isfullscreen) || c->isfixed
+	  || !c->mon->lt[c->mon->sellt]->arrange) && !c->isfloatpos)
+	  setfloatpos(c,"50% 50%");
 	c->sfx = c->x;
 	c->sfy = c->y;
 	c->sfw = c->w;
