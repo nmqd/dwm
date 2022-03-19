@@ -144,6 +144,7 @@ struct Client {
 	int oldx, oldy, oldw, oldh;
 	int basew, baseh, incw, inch, maxw, maxh, minw, minh;
 	int bw, oldbw;
+	unsigned int switchtag;
 	unsigned int tags;
 	int isfixed, isfloating, isfloatpos, isurgent, neverfocus, oldstate, isfullscreen, isterminal, noswallow;
 	int ignorecfgreqpos, ignorecfgreqsize;
@@ -206,6 +207,7 @@ typedef struct {
 	const char *title;
 	const char *wintype;
 	unsigned int tags;
+	int switchtag;
 	int isfloating;
 	int isterminal;
 	int noswallow;
@@ -471,7 +473,7 @@ applyrules(Client *c)
 	const char *class, *instance;
 	char role[64];
 	Atom wintype;
-	unsigned int i;
+	unsigned int i, newtagset;
 	const Rule *r;
 	Monitor *m;
 	XClassHint ch = { NULL, NULL };
@@ -505,6 +507,25 @@ applyrules(Client *c)
 			for (m = mons; m && m->num != r->monitor; m = m->next);
 			if (m)
 				c->mon = m;
+
+			if (r->switchtag) {
+				selmon = c->mon;
+				if (r->switchtag == 2 || r->switchtag == 4)
+					newtagset = c->mon->tagset[c->mon->seltags] ^ c->tags;
+				else
+					newtagset = c->tags;
+
+				if (newtagset && !(c->tags & c->mon->tagset[c->mon->seltags])) {
+					if (r->switchtag == 3 || r->switchtag == 4)
+						c->switchtag = c->mon->tagset[c->mon->seltags];
+					if (r->switchtag == 1 || r->switchtag == 3)
+						view(&((Arg) { .ui = newtagset }));
+					else {
+						c->mon->tagset[c->mon->seltags] = newtagset;
+						arrange(c->mon);
+					}
+				}
+			}
 			if (r->floatpos) {
         c->isfloating = 1;
 				setfloatpos(c, r->floatpos);
@@ -3494,6 +3515,8 @@ sendmon(Client *c, Monitor *m)
 		restack(m);
 	} else
 		focus(NULL);
+	if (c->switchtag)
+		c->switchtag = 0;
 }
 
 void
@@ -4001,6 +4024,8 @@ tag(const Arg *arg)
 {
 	if (selmon->sel && arg->ui & TAGMASK) {
 		selmon->sel->tags = arg->ui & TAGMASK;
+		if (selmon->sel->switchtag)
+			selmon->sel->switchtag = 0;
 		focus(NULL);
 		arrange(selmon);
 	}
@@ -4329,6 +4354,7 @@ unmanage(Client *c, int destroyed)
 {
 	Client *s;
 	Monitor *m = c->mon;
+	unsigned int switchtag = c->switchtag;
 	XWindowChanges wc;
 
 	if (c->swallowing)
@@ -4355,6 +4381,8 @@ unmanage(Client *c, int destroyed)
 	focus(NULL);
 	updateclientlist();
 	arrange(m);
+	if (switchtag)
+		view(&((Arg) { .ui = switchtag }));
 }
 
 void
