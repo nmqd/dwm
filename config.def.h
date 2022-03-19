@@ -156,9 +156,10 @@ static const Rule rules[] = {
 	RULE(.wintype = WTYPE "TOOLBAR", .isfloating = 1)
 	RULE(.wintype = WTYPE "SPLASH", .isfloating = 1)
 	RULE(.role = "pop-up", .isfloating = 1)
-  RULE(.class = "Firefox", .tags = 1 << 8)
+  RULE(.class = "firefox-default", .tags = 1 << 8)
 	RULE(.class = "st-256color", .isterminal = 1)
   RULE(.title = "scratchpad", .floatpos = "50% 50% 60% 60%", .scratchkey = 's')
+  RULE(.class = "lf", .tags = 1 << 3, .floatpos = "50% 50% 60% 60%")
 	RULE(.title = "Event Tester", .noswallow = 1)
 };
 
