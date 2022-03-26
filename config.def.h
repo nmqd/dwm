@@ -167,7 +167,7 @@ static const Rule rules[] = {
 static const float mfact     = 0.55; /* factor of master area size [0.05..0.95] */
 static const int nmaster     = 1;    /* number of clients in master area */
 static const int resizehints = 0;    /* 1 means respect size hints in tiled resizals */
-static const int lockfullscreen = 1; /* 1 will force focus on the fullscreen window */
+// static const int lockfullscreen = 1; /* 1 will force focus on the fullscreen window */
 static const int decorhints  = 1;    /* 1 means respect decoration hints */
 
 #define FORCE_VSPLIT 1  /* nrowgrid layout: force two clients to always split vertically */
@@ -276,12 +276,18 @@ static Key keys[] = {
 	{ M,          XK_e,      setlayout,      {.v = &layouts[13]} },
 	{ M,          XK_space,  setlayout,      {0} },
 	{ M|S,        XK_space,  togglefloating, {0} },
+	{ M,          XK_f,      togglefullscreen, {0} },
+	{ M|S,        XK_f,      togglefakefullscreen, {0} },
 	{ M,          XK_0,      view,           {.ui = ~0 } },
 	{ M|S,        XK_0,      tag,            {.ui = ~0 } },
 	{ M,          XK_comma,  focusmon,       {.i = -1 } },
 	{ M,          XK_period, focusmon,       {.i = +1 } },
 	{ M|S,        XK_comma,  tagmon,         {.i = -1 } },
 	{ M|S,        XK_period, tagmon,         {.i = +1 } },
+	{ M|A|S,      XK_comma,  tagallmon,      {.i = +1 } },
+	{ M|A|S,      XK_period, tagallmon,      {.i = -1 } },
+	{ M|A|C,      XK_comma,  tagswapmon,     {.i = +1 } },
+	{ M|A|C,      XK_period, tagswapmon,     {.i = -1 } },
 	{ M|C,        XK_comma,  cyclelayout,    {.i = -1 } },
 	{ M|C,        XK_period, cyclelayout,    {.i = +1 } },
 	// { M|S,        XK_a,      seticonset,     {.i = 0 } },
