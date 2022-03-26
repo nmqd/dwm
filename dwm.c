@@ -320,6 +320,7 @@ static void removescratch(const Arg *arg);
 static void replaceclient(Client *old, Client *new);
 static void resize(Client *c, int x, int y, int w, int h, int interact);
 static void resizeclient(Client *c, int x, int y, int w, int h);
+static void resizeclientpad(Client *c, int x, int y, int w, int h, int xpad, int ypad);
 static void resizemouse(const Arg *arg);
 static void restack(Monitor *m);
 static int riodraw(Client *c, const char slopstyle[]);
@@ -3162,6 +3163,7 @@ propertynotify(XEvent *e)
 			break;
 		case XA_WM_NORMAL_HINTS:
 			updatesizehints(c);
+			arrangemon(c->mon);
 			break;
 		case XA_WM_HINTS:
 			updatewmhints(c);
@@ -3260,14 +3262,24 @@ replaceclient(Client *old, Client *new)
 }
 
 void
-resize(Client *c, int x, int y, int w, int h, int interact)
+resize(Client *c, int tx, int ty, int tw, int th, int interact)
 {
-	if (applysizehints(c, &x, &y, &w, &h, interact))
-		resizeclient(c, x, y, w, h);
+	int wh = tw, hh = th;
+	if (applysizehints(c, &tx, &ty, &wh, &hh, interact))
+		resizeclientpad(c, tx, ty, wh, hh, tw, th);
 }
 
+/* This wrapper is just for compatibility with other patches that may call resizeclient */
 void
 resizeclient(Client *c, int x, int y, int w, int h)
+{
+	resizeclientpad(c, x, y, w, h, w, h);
+}
+
+/* This is essentially the resizeclient function renamed with two
+ * additional parameters, tw and th (for tile width and height). */
+void
+resizeclientpad(Client *c, int x, int y, int w, int h, int tw, int th)
 {
 	XWindowChanges wc;
 
@@ -3275,6 +3287,17 @@ resizeclient(Client *c, int x, int y, int w, int h)
 	c->oldy = c->y; c->y = wc.y = y;
 	c->oldw = c->w; c->w = wc.width = w;
 	c->oldh = c->h; c->h = wc.height = h;
+	if (!c->isfloating) {
+		if (w != tw) {
+			wc.x += (tw - w) / 2;
+			c->w = tw;
+		}
+		if (h != th) {
+			wc.y += (th - h) / 2;
+			c->h = th;
+		}
+	}
+
 
 	if (c->beingmoved)
 		return;
