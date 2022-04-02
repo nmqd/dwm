@@ -235,6 +235,10 @@ static Key keys[] = {
 	{ M,          XK_b,      togglebar,      {0} },
 	{ M,          XK_j,      focusstack,     {.i = +1 } },
 	{ M,          XK_k,      focusstack,     {.i = -1 } },
+	{ M,          XK_Left,   focusdir,       {.i = 0 } }, // left
+	{ M,          XK_Right,  focusdir,       {.i = 1 } }, // right
+	{ M,          XK_Up,     focusdir,       {.i = 2 } }, // up
+	{ M,          XK_Down,   focusdir,       {.i = 3 } }, // down
 	{ M,          XK_i,      incnmaster,     {.i = +1 } },
 	{ M,          XK_d,      incnmaster,     {.i = -1 } },
 	{ M,          XK_h,      setmfact,       {.f = -0.05} },
