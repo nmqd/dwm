@@ -2819,6 +2819,7 @@ manage(Window w, XWindowAttributes *wa)
 		c->alwaysontop = 1;
 	if (getatomprop(c, netatom[NetWMState]) == netatom[NetWMFullscreen])
 		setfullscreen(c, 1);
+	updatesizehints(c);
 	updatewmhints(c);
 	updatemotifhints(c);
 	if (((c->isfloating && !c->isfullscreen) || c->isfixed
@@ -2831,7 +2832,7 @@ manage(Window w, XWindowAttributes *wa)
 	XSelectInput(dpy, w, EnterWindowMask|FocusChangeMask|PropertyChangeMask|StructureNotifyMask);
 	grabbuttons(c, 0);
 	if (!c->isfloating)
-		c->isfloating = c->oldstate = t || c->isfixed;
+		c->isfloating = c->oldstate = trans != None || c->isfixed;
 	if (c->isfloating)
 		XRaiseWindow(dpy, c->win);
 
