@@ -349,6 +349,7 @@ static Key keys[] = {
 	TAGKEYS(      XK_9,                      8)
 	{ M,          XK_F5,     xrdb,           {.v = NULL } },
 	{ M|S,        XK_q,      quit,           {0} },
+	{ M|C|S,      XK_q,      quit,           {1} },
 };
 
 /* button definitions */
