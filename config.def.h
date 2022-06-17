@@ -209,6 +209,14 @@ static const MonitorRule monrules[] = {
 	{ M|S,   KEY,   tag,            {.ui = 1 << TAG} }, \
 	{ M|A,   KEY,   tagview,        {.ui = 1 << TAG} }, \
 	{ M|C|S, KEY,   toggletag,      {.ui = 1 << TAG} },
+#define STACKKEYS(MOD,ACTION) \
+	{ MOD, XK_j,     ACTION##stack, {.i = INC(+1) } }, \
+	{ MOD, XK_k,     ACTION##stack, {.i = INC(-1) } }, \
+	{ MOD, XK_grave, ACTION##stack, {.i = PREVSEL } }, \
+	{ MOD, XK_q,     ACTION##stack, {.i = 0 } }, \
+	{ MOD, XK_a,     ACTION##stack, {.i = 1 } }, \
+	{ MOD, XK_z,     ACTION##stack, {.i = 2 } }, \
+	{ MOD, XK_x,     ACTION##stack, {.i = -1 } },
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
@@ -225,6 +233,8 @@ static const char *scratchpadcmd[] = {"s", "st", "-t", "scratchpad", NULL};
 
 static Key keys[] = {
 	/* modifier   key        function        argument */
+	STACKKEYS(M,             focus)
+	STACKKEYS(M|S,           push)
 	{ M,          XK_p,      spawn,          {.v = dmenucmd } },
 	{ M|S,        XK_Return, spawn,          {.v = termcmd } },
 	{ M|C,        XK_Return, riospawn,       {.v = termcmd } },
@@ -233,8 +243,6 @@ static Key keys[] = {
 	{ M|S,        XK_s,      removescratch,  {.v = scratchpadcmd } },
 	{ M|C,        XK_s,      setscratch,     {.v = scratchpadcmd } },
 	{ M,          XK_b,      togglebar,      {0} },
-	{ M,          XK_j,      focusstack,     {.i = +1 } },
-	{ M,          XK_k,      focusstack,     {.i = -1 } },
 	{ M,          XK_Left,   focusdir,       {.i = 0 } }, // left
 	{ M,          XK_Right,  focusdir,       {.i = 1 } }, // right
 	{ M,          XK_Up,     focusdir,       {.i = 2 } }, // up
@@ -348,8 +356,8 @@ static Key keys[] = {
 	TAGKEYS(      XK_8,                      7)
 	TAGKEYS(      XK_9,                      8)
 	{ M,          XK_F5,     xrdb,           {.v = NULL } },
-	{ M|S,        XK_q,      quit,           {0} },
-	{ M|C|S,      XK_q,      quit,           {1} },
+	{ M|C|S,      XK_q,      quit,           {0} },
+	{ M|S,        XK_BackSpace, quit,        {1} },
 };
 
 /* button definitions */
